@@ -143,24 +143,24 @@ const uint8_t F_GHOST = 2;
 const uint8_t W_GHOST = 9;
 static const uint8_t PROGMEM ghost[F_GHOST * W_GHOST] =
 {
- 0x00, 0xfe, 0x7b, 0xf3, 0x7f, 0xfb, 0x73, 0xfe, 0x00, 
- 0x00, 0xfe, 0x73, 0xfb, 0x7f, 0xf3, 0x7b, 0xfe, 0x00
+  0x00, 0xfe, 0x7b, 0xf3, 0x7f, 0xfb, 0x73, 0xfe, 0x00,
+  0x00, 0xfe, 0x73, 0xfb, 0x7f, 0xf3, 0x7b, 0xfe, 0x00
 };
 
 const uint8_t F_INVADER = 2;
 const uint8_t W_INVADER = 12;
 static const uint8_t PROGMEM invader[F_INVADER * W_INVADER] =
 {
- 0x00, 0x70, 0x10, 0x7d, 0xb6, 0x3c, 0x3c, 0xb6, 0x7d, 0x10, 0x70, 0x00,
- 0x00, 0x1c, 0x28, 0x7d, 0x36, 0x3c, 0x3c, 0x36, 0x7d, 0x28, 0x1c, 0x00 
+  0x00, 0x70, 0x10, 0x7d, 0xb6, 0x3c, 0x3c, 0xb6, 0x7d, 0x10, 0x70, 0x00,
+  0x00, 0x1c, 0x28, 0x7d, 0x36, 0x3c, 0x3c, 0x36, 0x7d, 0x28, 0x1c, 0x00
 };
 
 const uint8_t F_MUSHROOM = 2;
 const uint8_t W_MUSHROOM = 11;
 static const uint8_t PROGMEM mushroom[F_MUSHROOM * W_MUSHROOM] =
 {
- 0x00, 0x1c, 0x62, 0x91, 0xb1, 0x91, 0xb1, 0x91, 0x62, 0x1c, 0x00, 
- 0x00, 0x1c, 0x62, 0x91, 0x91, 0x91, 0x91, 0x91, 0x62, 0x1c, 0x00 
+  0x00, 0x1c, 0x62, 0x91, 0xb1, 0x91, 0xb1, 0x91, 0x62, 0x1c, 0x00,
+  0x00, 0x1c, 0x62, 0x91, 0x91, 0x91, 0x91, 0x91, 0x62, 0x1c, 0x00
 };
 
 
@@ -179,6 +179,9 @@ void setup(void)
 
   P.addChar('$', degC);
   P.addChar('&', degF);
+
+  randomSeed(analogRead(0));
+
 }
 
 void loop(void)
@@ -187,6 +190,8 @@ void loop(void)
   static uint8_t  display = 0;  // current display mode
   static uint8_t  anim = 0;  // current animation mode
   static bool flasher = false;  // seconds passing flasher
+  static uint8_t ran;
+  
   P.setIntensity(0);
   P.displayAnimate();
 
@@ -194,9 +199,31 @@ void loop(void)
   {
     switch (display)
     {
-      case 0: // Temperature
+      case 0: // greetings
+        P.setTextEffect(0, PA_SCROLL_LEFT, PA_SCROLL_LEFT);
+        ran = random(3);
+        switch (ran)
+        {
+          case 0:
+            strcpy(szMesg, "I am Groot!");
+            break;
+          case 1:
+            strcpy(szMesg, "knock knock Neo");
+            break;
+          case 2:
+            strcpy(szMesg, "There is no spoon");
+            break;
+          case 3:
+            strcpy(szMesg, "42");
+            break;
+        }
+        
+        display++;
+        break;
 
-        switch (anim) 
+      case 1: // Temperature
+
+        switch (anim)
         {
           case 0:
             P.setSpriteData(pacman1, W_PMAN1, F_PMAN1, pacman2, W_PMAN2, F_PMAN2);
@@ -215,7 +242,7 @@ void loop(void)
             anim = 0;
             break;
         }
-      
+
         P.setPause(0, 4000);
         P.setTextEffect(0, PA_SPRITE, PA_SPRITE);
         display++;
@@ -224,7 +251,7 @@ void loop(void)
 
         break;
 
-      case 1: // Clock
+      case 2: // Clock
 
         P.setFont(0, numeric7Seg);
         P.setTextEffect(0, PA_PRINT, PA_NO_EFFECT);
@@ -237,21 +264,21 @@ void loop(void)
           flasher = !flasher;
         }
         if (s == 00 && s <= 30) {
-          display = 0;
+          display = 1;
           P.setTextEffect(0, PA_PRINT, PA_SCROLL_DOWN);
         }
 
         break;
-        
-//      case 2: // day of week
-//
-//        P.setFont(0,nullptr);
-//        P.setTextEffect(0, PA_SCROLL_LEFT, PA_SCROLL_LEFT);
-//        display = 0;
-//        dow2str(Clock.getDoW()+1, szMesg, MAX_MESG); // Added +1 to get correct DoW
-//
-//       //dow2str(5, szMesg, MAX_MESG);
-//        break;
+
+        //      case 2: // day of week
+        //
+        //        P.setFont(0,nullptr);
+        //        P.setTextEffect(0, PA_SCROLL_LEFT, PA_SCROLL_LEFT);
+        //        display = 0;
+        //        dow2str(Clock.getDoW()+1, szMesg, MAX_MESG); // Added +1 to get correct DoW
+        //
+        //       //dow2str(5, szMesg, MAX_MESG);
+        //        break;
     }
 
     P.displayReset(0); //rest zone zero
