@@ -140,12 +140,29 @@ static const uint8_t PROGMEM pacman2[F_PMAN2 * W_PMAN2] =  // ghost pursued by a
 
 
 const uint8_t F_GHOST = 2;
-const uint8_t W_GHOST = 7;
+const uint8_t W_GHOST = 9;
 static const uint8_t PROGMEM ghost[F_GHOST * W_GHOST] =
 {
- 0xfe, 0x7b, 0xf3, 0x7f, 0xfb, 0x73, 0xfe,
- 0xfe, 0x73, 0xfb, 0x7f, 0xf3, 0x7b, 0xfe,
+ 0x00, 0xfe, 0x7b, 0xf3, 0x7f, 0xfb, 0x73, 0xfe, 0x00, 
+ 0x00, 0xfe, 0x73, 0xfb, 0x7f, 0xf3, 0x7b, 0xfe, 0x00
 };
+
+const uint8_t F_INVADER = 2;
+const uint8_t W_INVADER = 12;
+static const uint8_t PROGMEM invader[F_INVADER * W_INVADER] =
+{
+ 0x00, 0x70, 0x10, 0x7d, 0xb6, 0x3c, 0x3c, 0xb6, 0x7d, 0x10, 0x70, 0x00,
+ 0x00, 0x1c, 0x28, 0x7d, 0x36, 0x3c, 0x3c, 0x36, 0x7d, 0x28, 0x1c, 0x00 
+};
+
+const uint8_t F_MUSHROOM = 2;
+const uint8_t W_MUSHROOM = 11;
+static const uint8_t PROGMEM mushroom[F_MUSHROOM * W_MUSHROOM] =
+{
+ 0x00, 0x1c, 0x62, 0x91, 0xb1, 0x91, 0xb1, 0x91, 0x62, 0x1c, 0x00, 
+ 0x00, 0x1c, 0x62, 0x91, 0x91, 0x91, 0x91, 0x91, 0x62, 0x1c, 0x00 
+};
+
 
 void setup(void)
 {
@@ -168,6 +185,7 @@ void loop(void)
 {
   static uint32_t lastTime = 0; // millis() memory
   static uint8_t  display = 0;  // current display mode
+  static uint8_t  anim = 0;  // current animation mode
   static bool flasher = false;  // seconds passing flasher
   P.setIntensity(0);
   P.displayAnimate();
@@ -177,9 +195,26 @@ void loop(void)
     switch (display)
     {
       case 0: // Temperature
-        P.setSpriteData(pacman1, W_PMAN1, F_PMAN1, pacman2, W_PMAN2, F_PMAN2);
-//        P.setSpriteData(ghost, W_GHOST, F_GHOST, ghost, W_GHOST, F_GHOST);
 
+        switch (anim) 
+        {
+          case 0:
+            P.setSpriteData(pacman1, W_PMAN1, F_PMAN1, pacman2, W_PMAN2, F_PMAN2);
+            anim++;
+            break;
+          case 1:
+            P.setSpriteData(ghost, W_GHOST, F_GHOST, invader, W_INVADER, F_INVADER);
+            anim++;
+            break;
+          case 2:
+            P.setSpriteData(invader, W_INVADER, F_INVADER, mushroom, W_MUSHROOM, F_MUSHROOM);
+            anim++;
+            break;
+          case 3:
+            P.setSpriteData(mushroom, W_MUSHROOM, F_MUSHROOM, ghost, W_GHOST, F_GHOST);
+            anim = 0;
+            break;
+        }
       
         P.setPause(0, 4000);
         P.setTextEffect(0, PA_SPRITE, PA_SPRITE);
@@ -202,21 +237,21 @@ void loop(void)
           flasher = !flasher;
         }
         if (s == 00 && s <= 30) {
-          display ++;
+          display = 0;
           P.setTextEffect(0, PA_PRINT, PA_SCROLL_DOWN);
         }
 
         break;
         
-      case 2: // day of week
-
-        P.setFont(0,nullptr);
-        P.setTextEffect(0, PA_SCROLL_LEFT, PA_SCROLL_LEFT);
-        display = 0;
-        dow2str(Clock.getDoW()+1, szMesg, MAX_MESG); // Added +1 to get correct DoW
-
-       //dow2str(5, szMesg, MAX_MESG);
-        break;
+//      case 2: // day of week
+//
+//        P.setFont(0,nullptr);
+//        P.setTextEffect(0, PA_SCROLL_LEFT, PA_SCROLL_LEFT);
+//        display = 0;
+//        dow2str(Clock.getDoW()+1, szMesg, MAX_MESG); // Added +1 to get correct DoW
+//
+//       //dow2str(5, szMesg, MAX_MESG);
+//        break;
     }
 
     P.displayReset(0); //rest zone zero
