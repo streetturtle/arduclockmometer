@@ -201,7 +201,7 @@ void loop(void)
     {
       case 0: // greetings
         P.setTextEffect(0, PA_SCROLL_LEFT, PA_SCROLL_LEFT);
-        ran = random(3);
+        ran = random(7);
         switch (ran)
         {
           case 0:
@@ -216,6 +216,16 @@ void loop(void)
           case 3:
             strcpy(szMesg, "42");
             break;
+          case 4:
+            strcpy(szMesg, "cowabunga!");
+            break;
+          case 5:
+            strcpy(szMesg, "Yippie-Ki-Yay!");
+            break;
+          case 6:
+            strcpy(szMesg, "Now I have a machine gun, HO-HO-HO");
+            break;
+
         }
         
         display++;
