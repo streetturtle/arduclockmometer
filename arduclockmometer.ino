@@ -1,21 +1,8 @@
-/*Arduino Clock by AnthoTRONICS
-  Last edit: December 21,2018
-*/
-// Libraries you'll need (Same as the ones in the guide):
-// MD Parola: https://github.com/MajicDesigns/MD_Parola // click the link to download the library
-// MD_MAX72XX: https://github.com/MajicDesigns/MD_MAX72XX //click the link to download the library
-// DS3231: https://github.com/adafruit/RTClib
-
-/*CODE:*/
-// Header file includes
-// These are for the matrix
 #include <MD_Parola.h>
 #include <MD_MAX72xx.h>
 #include <SPI.h>
 #include "Font_Data.h"
-//#include "Font_Data_Rus.h"
 
-//These are for the clock
 #include <DS3231.h>
 #include <Wire.h>
 DS3231 Clock;
@@ -26,18 +13,15 @@ bool PM;
 byte  dd, mm, yyy;
 uint16_t  h, m, s;
 
-#define MAX_DEVICES 4 // Set the number of devices
+#define MAX_DEVICES 4
 #define HARDWARE_TYPE MD_MAX72XX::FC16_HW
-// NOTE: These pin numbers will probably not work with your hardware and may
-// need to be adapted
 #define CLK_PIN   13
 #define DATA_PIN  11
 #define CS_PIN    10
 
-// Hardware SPI connection
 MD_Parola P = MD_Parola(HARDWARE_TYPE, CS_PIN, MAX_DEVICES);
 
-#define SPEED_TIME 75 // speed of the transition
+#define SPEED_TIME 60 // speed of the transition
 #define PAUSE_TIME  0
 
 #define MAX_MESG  20
@@ -47,8 +31,7 @@ MD_Parola P = MD_Parola(HARDWARE_TYPE, CS_PIN, MAX_DEVICES);
 char szTime[9];    // mm:ss\0
 char szMesg[MAX_MESG + 1] = "";
 
-uint8_t degC[] = { 6, 3, 3, 56, 68, 68, 68 }; // Deg C
-uint8_t degF[] = { 6, 3, 3, 124, 20, 20, 4 }; // Deg F
+uint8_t degC[] = { 6, 3, 3, 56, 68, 68, 68 };
 
 char *mon2str(uint8_t mon, char *psz, uint8_t len)
 
@@ -67,51 +50,12 @@ char *mon2str(uint8_t mon, char *psz, uint8_t len)
   return (psz);
 }
 
-char *dow2str(uint8_t code, char *psz, uint8_t len)
-{
-  static const __FlashStringHelper*	str[] =
-  {
-    F("Monday"), F("Tuesday"),
-    F("Wednesday"), F("Thursday"), F("Friday"),
-    F("Saturday"), F("Sunday")
-  };
-
-  strncpy_P(psz, (const char PROGMEM *)str[code - 1], len);
-  psz[len] = '\0';
-
-  return (psz);
-}
-// Time Setup: Code for reading clock time
 void getTime(char *psz, bool f = true)
 {
   s = Clock.getSecond();
   m = Clock.getMinute();
   h = Clock.getHour(h12, PM); //24HR Format
   sprintf(psz, "%02d%c%02d", h, (f ? ':' : ' '), m);
-  //12hr Format
-  //uncomment if you want the clock to be in 12hr Format
-  /*if (Clock.getHour(h12,PM)>=13 || Clock.getHour(h12,PM)==0)
-    {
-    h = Clock.getHour(h12,PM) - 12;
-    }
-    else
-    {
-    h = Clock.getHour(h12,PM);
-    }*/
-
-}
-
-void getDate(char *psz)
-// Date Setup: Code for reading clock date
-{
-  char  szBuf[10];
-
-
-  dd = Clock.getDate();
-  mm = Clock.getMonth(Century); //12
-  yyy = Clock.getYear();
-  sprintf(psz, "%d %s %04d", dd , mon2str(mm, szBuf, sizeof(szBuf) - 1), (yyy + 2000));
-  //strcpy(szMesg, "29 Feb 2016");
 }
 
 const uint8_t F_PMAN1 = 6;
@@ -178,7 +122,6 @@ void setup(void)
   P.displayZoneText(0, szMesg, PA_CENTER, SPEED_TIME, 0, PA_PRINT , PA_NO_EFFECT);
 
   P.addChar('$', degC);
-  P.addChar('&', degF);
 
   randomSeed(analogRead(0));
 
@@ -202,6 +145,7 @@ void loop(void)
       case 0: // greetings
         P.setTextEffect(0, PA_SCROLL_LEFT, PA_SCROLL_LEFT);
         ran = random(7);
+
         switch (ran)
         {
           case 0:
@@ -277,21 +221,8 @@ void loop(void)
           display = 1;
           P.setTextEffect(0, PA_PRINT, PA_SCROLL_DOWN);
         }
-
-        break;
-
-        //      case 2: // day of week
-        //
-        //        P.setFont(0,nullptr);
-        //        P.setTextEffect(0, PA_SCROLL_LEFT, PA_SCROLL_LEFT);
-        //        display = 0;
-        //        dow2str(Clock.getDoW()+1, szMesg, MAX_MESG); // Added +1 to get correct DoW
-        //
-        //       //dow2str(5, szMesg, MAX_MESG);
-        //        break;
     }
 
     P.displayReset(0); //rest zone zero
   }
-
-}///////end of loop
+}
