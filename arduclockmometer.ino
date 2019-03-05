@@ -83,7 +83,7 @@ static const uint8_t PROGMEM pacman2[F_PMAN2 * W_PMAN2] =  // ghost pursued by a
 };
 
 
-const uint8_t F_GHOST = 2;
+const uint8_t F_GHOST = 6;
 const uint8_t W_GHOST = 9;
 static const uint8_t PROGMEM ghost[F_GHOST * W_GHOST] =
 {
@@ -95,7 +95,7 @@ static const uint8_t PROGMEM ghost[F_GHOST * W_GHOST] =
   0x00, 0xfe, 0x73, 0xfb, 0x7f, 0xf3, 0x7b, 0xfe, 0x00
 };
 
-const uint8_t F_INVADER = 2;
+const uint8_t F_INVADER = 6;
 const uint8_t W_INVADER = 12;
 static const uint8_t PROGMEM invader[F_INVADER * W_INVADER] =
 {
@@ -107,7 +107,7 @@ static const uint8_t PROGMEM invader[F_INVADER * W_INVADER] =
   0x00, 0x1c, 0x28, 0x7d, 0x36, 0x3c, 0x3c, 0x36, 0x7d, 0x28, 0x1c, 0x00
 };
 
-const uint8_t F_MUSHROOM = 2;
+const uint8_t F_MUSHROOM = 6;
 const uint8_t W_MUSHROOM = 11;
 static const uint8_t PROGMEM mushroom[F_MUSHROOM * W_MUSHROOM] =
 {
@@ -135,8 +135,6 @@ void setup(void)
 
   P.addChar('$', degC);
 
-  randomSeed(analogRead(0));
-
 }
 
 void loop(void)
@@ -156,8 +154,7 @@ void loop(void)
     {
       case 0: // greetings
         P.setTextEffect(0, PA_SCROLL_LEFT, PA_SCROLL_LEFT);
-        ran = random(7);
-
+        ran = Clock.getSecond() % 6;
         switch (ran)
         {
           case 0:
@@ -181,7 +178,6 @@ void loop(void)
           case 6:
             strcpy(szMesg, "Now I have a machine gun, HO-HO-HO");
             break;
-
         }
         
         display++;
