@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="936a9cb1-a7b8-4366-ab98-c6042ec3721d" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/arduclockmometer.ino" beforeDir="false" afterPath="$PROJECT_DIR$/arduclockmometer.ino" afterDir="false" />
-    </list>
+    <list default="true" id="936a9cb1-a7b8-4366-ab98-c6042ec3721d" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -15,9 +12,7 @@
     <leaf>
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/arduclockmometer.ino">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-2250" />
-          </provider>
+          <provider selected="true" editor-type-id="text-editor" />
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
@@ -25,19 +20,14 @@
           <provider editor-type-id="Gfm" />
           <provider selected="true" editor-type-id="split-provider[text-editor;MarkdownPreviewEditor]">
             <state split_layout="FIRST">
-              <first_editor relative-caret-position="401">
-                <caret line="47" selection-start-line="47" selection-end-line="47" />
+              <first_editor relative-caret-position="60">
+                <caret line="4" column="19" selection-start-line="4" selection-start-column="19" selection-end-line="4" selection-end-column="19" />
               </first_editor>
               <second_editor>
                 <markdownNavigatorState />
               </second_editor>
             </state>
           </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Clock_temp.ino">
-          <provider selected="true" editor-type-id="text-editor" />
         </entry>
       </file>
     </leaf>
@@ -110,16 +100,15 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1551746148228</updated>
-      <workItem from="1551746157278" duration="215000" />
+      <workItem from="1551746157278" duration="533000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="215000" />
+    <option name="totallyTimeSpent" value="533000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="22" width="1920" height="1058" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info id="Designer" />
       <window_info id="Image Layers" />
@@ -164,23 +153,21 @@
     <entry file="file://$PROJECT_DIR$/Clock_temp.ino">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/arduclockmometer.ino">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-2250" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/README.md">
       <provider editor-type-id="Gfm" />
       <provider selected="true" editor-type-id="split-provider[text-editor;MarkdownPreviewEditor]">
         <state split_layout="FIRST">
-          <first_editor relative-caret-position="401">
-            <caret line="47" selection-start-line="47" selection-end-line="47" />
+          <first_editor relative-caret-position="60">
+            <caret line="4" column="19" selection-start-line="4" selection-start-column="19" selection-end-line="4" selection-end-column="19" />
           </first_editor>
           <second_editor>
             <markdownNavigatorState />
           </second_editor>
         </state>
       </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/arduclockmometer.ino">
+      <provider selected="true" editor-type-id="text-editor" />
     </entry>
   </component>
   <component name="masterDetails">
