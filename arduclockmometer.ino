@@ -2,6 +2,8 @@
 #include <MD_MAX72xx.h>
 #include <SPI.h>
 #include "Font_Data.h"
+#include <DHT.h>
+
 
 #include <DS3231.h>
 #include <Wire.h>
@@ -18,6 +20,11 @@ uint16_t  h, m, s;
 #define CLK_PIN   13
 #define DATA_PIN  11
 #define CS_PIN    10
+
+#define DHTPIN 7     // what pin we're connected to
+#define DHTTYPE DHT22   // DHT 22  (AM2302)
+DHT dht(DHTPIN, DHTTYPE); //// Initialize DHT sensor for normal 16mhz Arduino
+
 
 MD_Parola P = MD_Parola(HARDWARE_TYPE, CS_PIN, MAX_DEVICES);
 
@@ -154,6 +161,10 @@ static const uint8_t PROGMEM friends[F_FRIENDS * W_FRIENDS] =
   0x1e, 0x25, 0x47, 0x47, 0x25, 0x1e, 0x00, 0x3c, 0x42, 0xb5, 0xf1, 0xf1, 0xb5, 0x42, 0x3c
 };
 
+int chk;
+float hum;  //Stores humidity value
+float temp; //Stores temperature value
+
 
 void setup(void)
 {
@@ -253,14 +264,23 @@ void loop(void)
         }
 
         P.setPause(0, 4000);
-        P.setTextEffect(0, PA_SPRITE, PA_SPRITE);
+
+        P.setTextEffect(0, PA_SPRITE, PA_SCROLL_DOWN);
         display++;
         dtostrf(Clock.getTemperature(), 3, 1, szMesg);
         strcat(szMesg, "$");
 
         break;
 
-      case 2: // Clock
+      case 2: // humidity
+        P.setTextEffect(0, PA_SCROLL_DOWN, PA_SPRITE);
+
+        display++;
+        dtostrf(dht.readHumidity(), 3, 0, szMesg);
+        strcat(szMesg, "%");
+        
+        break;
+      case 3: // Clock
 
         P.setFont(0, numeric7Seg);
         P.setTextEffect(0, PA_PRINT, PA_NO_EFFECT);
