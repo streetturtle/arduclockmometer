@@ -7,6 +7,8 @@ Clock and thermometer based on arduino and max7219 led panel
  - [MD_Parola](https://github.com/MajicDesigns/MD_Parola)
  - [MD_MAX72XX](https://github.com/MajicDesigns/MD_MAX72XX)
  - [DS3231](https://github.com/NorthernWidget/DS3231)
+ - [Adafruit Sensor](https://github.com/adafruit/Adafruit_Sensor)
+ - [DHT](https://github.com/adafruit/DHT-sensor-library)
 
 Could be installed by **Tools** -> **Manage Libraries** and then search by name, or by downloading .zip from github and unzipping inside arduino's libraries folder.
 
