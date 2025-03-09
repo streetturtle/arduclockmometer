@@ -204,13 +204,13 @@ void loop(void)
         switch (ran)
         {
           case 0:
-            strcpy(szMesg, "I am Groot!");
+            strcpy(szMesg, "Aliska-sosiska!");
             break;
           case 1:
-            strcpy(szMesg, "knock knock Neo");
+            strcpy(szMesg, "Sonic - peperonic");
             break;
           case 2:
-            strcpy(szMesg, "There is no spoon");
+            strcpy(szMesg, "Sonic - mascarponic");
             break;
           case 3:
             strcpy(szMesg, "42");
@@ -272,15 +272,15 @@ void loop(void)
 
         break;
 
-      case 2: // humidity
-        P.setTextEffect(0, PA_SCROLL_DOWN, PA_SPRITE);
+      // case 2: // humidity
+      //   P.setTextEffect(0, PA_SCROLL_DOWN, PA_SPRITE);
 
-        display++;
-        dtostrf(dht.readHumidity(), 3, 0, szMesg);
-        strcat(szMesg, "%");
+      //   display = 1;
+      //   dtostrf(dht.readHumidity(), 3, 0, szMesg);
+      //   strcat(szMesg, "%");
         
-        break;
-      case 3: // Clock
+      //   break;
+      case 2: // Clock
 
         P.setFont(0, numeric7Seg);
         P.setTextEffect(0, PA_PRINT, PA_NO_EFFECT);
