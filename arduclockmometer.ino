@@ -2,18 +2,17 @@
 #include <MD_MAX72xx.h>
 #include <SPI.h>
 #include "Font_Data.h"
-#include <DHT.h>
-
 
 #include <DS3231.h>
 #include <Wire.h>
 DS3231 Clock;
 
-bool Century = false;
 bool h12;
 bool PM;
-byte  dd, mm, yyy;
 uint16_t  h, m, s;
+
+// Set to 1 to write the computer's compile time to the RTC on boot, upload, then set back to 0 and upload again
+#define SET_RTC_TIME 0
 
 #define MAX_DEVICES 4
 #define HARDWARE_TYPE MD_MAX72XX::FC16_HW
@@ -21,41 +20,83 @@ uint16_t  h, m, s;
 #define DATA_PIN  11
 #define CS_PIN    10
 
-#define DHTPIN 7     // what pin we're connected to
-#define DHTTYPE DHT22   // DHT 22  (AM2302)
-DHT dht(DHTPIN, DHTTYPE); //// Initialize DHT sensor for normal 16mhz Arduino
-
-
 MD_Parola P = MD_Parola(HARDWARE_TYPE, CS_PIN, MAX_DEVICES);
 
 #define SPEED_TIME 60 // speed of the transition
-#define PAUSE_TIME  0
 
-#define MAX_MESG  20
+#define BRIGHT_DAY   4  // 0..15
+#define BRIGHT_NIGHT 0  // 0..15
+#define NIGHT_START 22  // hour when dimming starts
+#define NIGHT_END    6  // hour when dimming ends
+
+#define MAX_MESG  40
 
 
 // Global variables
-char szTime[9];    // mm:ss\0
 char szMesg[MAX_MESG + 1] = "";
 
 uint8_t degC[] = { 6, 3, 3, 56, 68, 68, 68 };
 
-char *mon2str(uint8_t mon, char *psz, uint8_t len)
-
-// Get a label from PROGMEM into a char array
+// Transitions picked at random for the clock
+const textEffect_t clockEffects[] =
 {
-  static const __FlashStringHelper* str[] =
-  {
-    F("Jan"), F("Feb"), F("Mar"), F("Apr"),
-    F("May"), F("Jun"), F("Jul"), F("Aug"),
-    F("Sep"), F("Oct"), F("Nov"), F("Dec")
-  };
+  PA_SCROLL_UP, PA_SCROLL_DOWN, PA_SCROLL_LEFT, PA_SCROLL_RIGHT,
+  PA_SCROLL_UP_LEFT, PA_SCROLL_DOWN_RIGHT,
+  PA_OPENING_CURSOR, PA_CLOSING_CURSOR, PA_WIPE_CURSOR,
+  PA_GROW_UP, PA_GROW_DOWN, PA_MESH, PA_DISSOLVE, PA_BLINDS, PA_SCAN_HORIZ
+};
 
-  strncpy_P(psz, (const char PROGMEM *)str[mon - 1], len);
-  psz[len] = '\0';
-
-  return (psz);
+textEffect_t randomEffect()
+{
+  return clockEffects[random(sizeof(clockEffects) / sizeof(clockEffects[0]))];
 }
+
+void updateBrightness()
+{
+  static uint8_t current = 0xff;
+  uint8_t wanted = (h >= NIGHT_START || h < NIGHT_END) ? BRIGHT_NIGHT : BRIGHT_DAY;
+
+  if (wanted != current)
+  {
+    P.setIntensity(wanted);
+    current = wanted;
+  }
+}
+
+void getGreeting(char *psz)
+{
+  switch (random(7))
+  {
+    case 0: strcpy_P(psz, PSTR("Aliska-sosiska!")); break;
+    case 1: strcpy_P(psz, PSTR("Sonic - peperonic")); break;
+    case 2: strcpy_P(psz, PSTR("Sonic - mascarponic")); break;
+    case 3: strcpy_P(psz, PSTR("42")); break;
+    case 4: strcpy_P(psz, PSTR("cowabunga!")); break;
+    case 5: strcpy_P(psz, PSTR("Yippie-Ki-Yay!")); break;
+    case 6: strcpy_P(psz, PSTR("Now I have a machine gun, HO-HO-HO")); break;
+  }
+}
+
+#if SET_RTC_TIME
+void setRtcFromCompileTime()
+{
+  // __DATE__ is "Mmm dd yyyy", __TIME__ is "hh:mm:ss"
+  const char *months = "JanFebMarAprMayJunJulAugSepOctNovDec";
+  const char *d = __DATE__;
+  const char *t = __TIME__;
+  byte mon = 1;
+
+  while (strncmp(months + (mon - 1) * 3, d, 3) != 0) mon++;
+
+  Clock.setClockMode(false); // 24h
+  Clock.setYear((d[9] - '0') * 10 + (d[10] - '0'));
+  Clock.setMonth(mon);
+  Clock.setDate((d[4] == ' ' ? 0 : (d[4] - '0') * 10) + (d[5] - '0'));
+  Clock.setHour((t[0] - '0') * 10 + (t[1] - '0'));
+  Clock.setMinute((t[3] - '0') * 10 + (t[4] - '0'));
+  Clock.setSecond((t[6] - '0') * 10 + (t[7] - '0'));
+}
+#endif
 
 void getTime(char *psz, bool f = true)
 {
@@ -161,23 +202,23 @@ static const uint8_t PROGMEM friends[F_FRIENDS * W_FRIENDS] =
   0x1e, 0x25, 0x47, 0x47, 0x25, 0x1e, 0x00, 0x3c, 0x42, 0xb5, 0xf1, 0xf1, 0xb5, 0x42, 0x3c
 };
 
-int chk;
-float hum;  //Stores humidity value
-float temp; //Stores temperature value
-
+enum { SHOW_GREETING, SHOW_TEMP, SHOW_CLOCK_IN, SHOW_CLOCK, SHOW_CHIME };
 
 void setup(void)
 {
-  P.begin(2);
+  P.begin();
   P.setInvert(false); //we don't want to invert anything so it is set to false
   Wire.begin();
+#if SET_RTC_TIME
+  setRtcFromCompileTime();
+#endif
 
-  P.setZone(0,  MAX_DEVICES - 4, MAX_DEVICES - 1);
+  randomSeed(analogRead(A0) ^ (Clock.getMinute() << 6) ^ Clock.getSecond());
 
-  P.setZone(1, MAX_DEVICES - 4, MAX_DEVICES - 1);
-  P.displayZoneText(1, szTime, PA_CENTER, SPEED_TIME, PAUSE_TIME, PA_PRINT, PA_NO_EFFECT);
+  h = Clock.getHour(h12, PM);
+  updateBrightness();
 
-  P.displayZoneText(0, szMesg, PA_CENTER, SPEED_TIME, 0, PA_PRINT , PA_NO_EFFECT);
+  P.displayText(szMesg, PA_CENTER, SPEED_TIME, 0, PA_PRINT, PA_NO_EFFECT);
 
   P.addChar('$', degC);
 
@@ -186,50 +227,26 @@ void setup(void)
 void loop(void)
 {
   static uint32_t lastTime = 0; // millis() memory
-  static uint8_t  display = 0;  // current display mode
+  static uint8_t  display = SHOW_GREETING;  // current display mode
   static uint8_t  anim = 0;  // current animation mode
   static bool flasher = false;  // seconds passing flasher
-  static uint8_t ran;
-  
-  P.setIntensity(0);
+
   P.displayAnimate();
 
   if (P.getZoneStatus(0))
   {
     switch (display)
     {
-      case 0: // greetings
+      case SHOW_GREETING: // on boot and every hour
+        P.setFont(0, nullptr);
         P.setTextEffect(0, PA_SCROLL_LEFT, PA_SCROLL_LEFT);
-        ran = Clock.getSecond() % 6;
-        switch (ran)
-        {
-          case 0:
-            strcpy(szMesg, "Aliska-sosiska!");
-            break;
-          case 1:
-            strcpy(szMesg, "Sonic - peperonic");
-            break;
-          case 2:
-            strcpy(szMesg, "Sonic - mascarponic");
-            break;
-          case 3:
-            strcpy(szMesg, "42");
-            break;
-          case 4:
-            strcpy(szMesg, "cowabunga!");
-            break;
-          case 5:
-            strcpy(szMesg, "Yippie-Ki-Yay!");
-            break;
-          case 6:
-            strcpy(szMesg, "Now I have a machine gun, HO-HO-HO");
-            break;
-        }
-        
-        display++;
+        P.setPause(0, 0);
+        getGreeting(szMesg);
+
+        display = SHOW_TEMP;
         break;
 
-      case 1: // Temperature
+      case SHOW_TEMP: // Temperature
 
         switch (anim)
         {
@@ -263,39 +280,55 @@ void loop(void)
             break;
         }
 
+        P.setFont(0, numeric7Seg);
         P.setPause(0, 4000);
 
-        P.setTextEffect(0, PA_SPRITE, PA_SCROLL_DOWN);
-        display++;
+        P.setTextEffect(0, PA_SPRITE, PA_SPRITE);
+        display = SHOW_CLOCK_IN;
         dtostrf(Clock.getTemperature(), 3, 1, szMesg);
         strcat(szMesg, "$");
 
         break;
 
-      // case 2: // humidity
-      //   P.setTextEffect(0, PA_SCROLL_DOWN, PA_SPRITE);
-
-      //   display = 1;
-      //   dtostrf(dht.readHumidity(), 3, 0, szMesg);
-      //   strcat(szMesg, "%");
-        
-      //   break;
-      case 2: // Clock
-
+      case SHOW_CLOCK_IN: // Clock appears with a random effect
         P.setFont(0, numeric7Seg);
-        P.setTextEffect(0, PA_PRINT, PA_NO_EFFECT);
+        P.setTextEffect(0, randomEffect(), PA_NO_EFFECT);
         P.setPause(0, 0);
+
+        lastTime = millis();
+        getTime(szMesg, true);
+        flasher = false;
+
+        display = SHOW_CLOCK;
+        break;
+
+      case SHOW_CLOCK: // Clock
+        P.setTextEffect(0, PA_PRINT, PA_NO_EFFECT);
 
         if (millis() - lastTime >= 1000)
         {
           lastTime = millis();
           getTime(szMesg, flasher);
           flasher = !flasher;
+          updateBrightness();
+
+          if (s == 0) // leave with a random effect once a minute
+          {
+            P.setTextEffect(0, PA_PRINT, randomEffect());
+            display = (m == 0) ? SHOW_CHIME : SHOW_TEMP;
+          }
         }
-        if (s == 00 && s <= 30) {
-          display = 1;
-          P.setTextEffect(0, PA_PRINT, PA_SCROLL_DOWN);
-        }
+        break;
+
+      case SHOW_CHIME: // hourly pacman chase, followed by a greeting
+        P.setFont(0, numeric7Seg);
+        P.setSpriteData(pacman2, W_PMAN2, F_PMAN2, pacman2, W_PMAN2, F_PMAN2);
+        P.setTextEffect(0, PA_SPRITE, PA_SPRITE);
+        P.setPause(0, 2000);
+        sprintf(szMesg, "%02d:00", h);
+
+        display = SHOW_GREETING;
+        break;
     }
 
     P.displayReset(0); //rest zone zero
